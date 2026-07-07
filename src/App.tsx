@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, PieChart, Pie, Cell, LineChart, Line,
@@ -11,6 +11,7 @@ import {
   TrendingUp, Percent, MessageSquarePlus, UserCog, PackageSearch, Download,
   ShoppingCart, BarChart3, Scale,
   Sparkles, CreditCard, Flame, Clock, PackagePlus, Send, Award, KeyRound, History,
+  Menu, X,
 } from "lucide-react";
 
 // ---------- helpers ----------
@@ -198,23 +199,23 @@ const calEvents = [
 // ---------- UI atoms ----------
 function Badge({ children, tone = "slate" }) {
   const tones = { slate: "bg-slate-100 text-slate-600", green: "bg-emerald-100 text-emerald-700", amber: "bg-amber-100 text-amber-700", rose: "bg-rose-100 text-rose-700", teal: "bg-indigo-100 text-indigo-700", blue: "bg-sky-100 text-sky-700" };
-  return <span className={"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium " + tones[tone]}>{children}</span>;
+  return <span className={"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap " + tones[tone]}>{children}</span>;
 }
 function Card({ title, children, action }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
-      {title && <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100"><h3 className="font-semibold text-slate-800 text-sm">{title}</h3>{action}</div>}
-      <div className="p-5">{children}</div>
+      {title && <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 border-b border-slate-100"><h3 className="font-semibold text-slate-800 text-sm">{title}</h3>{action}</div>}
+      <div className="p-4 sm:p-5">{children}</div>
     </div>
   );
 }
 const Th = ({ children, right }) => <th className={"px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide " + (right ? "text-right" : "text-left")}>{children}</th>;
 const Td = ({ children, right, className = "" }) => <td className={"px-4 py-3 text-sm text-slate-700 " + (right ? "text-right " : "") + className}>{children}</td>;
-const AddBtn = ({ label }) => <button className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-xl"><Plus size={14} /> {label}</button>;
+const AddBtn = ({ label }) => <button className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-2 sm:py-1.5 rounded-xl min-h-[44px] sm:min-h-0"><Plus size={14} /> {label}</button>;
 function TableScreen({ title, action, children, foot }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100"><h3 className="font-semibold text-slate-800 text-sm">{title}</h3>{action}</div>
+      <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 border-b border-slate-100"><h3 className="font-semibold text-slate-800 text-sm">{title}</h3>{action}</div>
       <div className="overflow-x-auto">{children}</div>{foot}
     </div>
   );
@@ -252,16 +253,16 @@ function Dashboard({ go }) {
   const medalColor = ["#f59e0b", "#94a3b8", "#b45309"];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-700 text-white p-6 shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-700 text-white p-4 sm:p-6 shadow-lg">
         <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/10" />
         <div className="absolute right-24 -bottom-16 w-40 h-40 rounded-full bg-white/10" />
-        <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+        <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-4 sm:gap-6 items-center">
           <div className="lg:col-span-2">
             <div className="text-indigo-100 text-xs font-medium mb-1">Выручка за июнь 2026</div>
-            <div className="flex items-end gap-3">
-              <div className="text-4xl font-extrabold tracking-tight">{mln(pnl.revenue)}</div>
+            <div className="flex items-end gap-2 sm:gap-3 flex-wrap">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight">{mln(pnl.revenue)}</div>
               <div className="flex items-center gap-1 text-emerald-300 text-sm font-semibold mb-1"><TrendingUp size={16} />+12% к маю</div>
             </div>
             <div style={{ height: 60 }} className="mt-3 -ml-2">
@@ -273,26 +274,26 @@ function Dashboard({ go }) {
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="grid grid-cols-3 lg:grid-cols-1 gap-3 lg:border-l lg:border-white/20 lg:pl-6">
-            <div><div className="text-indigo-100 text-xs">Чистая прибыль</div><div className="text-xl font-bold">{mln(profit)}</div></div>
-            <div><div className="text-indigo-100 text-xs">Рентабельность</div><div className="text-xl font-bold">{rentab}%</div></div>
-            <div><div className="text-indigo-100 text-xs">Остатки на складе</div><div className="text-xl font-bold">{mln(1284500000)}</div></div>
+          <div className="grid grid-cols-3 lg:grid-cols-1 gap-2 sm:gap-3 lg:border-l lg:border-white/20 lg:pl-6">
+            <div><div className="text-indigo-100 text-xs">Чистая прибыль</div><div className="text-base sm:text-xl font-bold">{mln(profit)}</div></div>
+            <div><div className="text-indigo-100 text-xs">Рентабельность</div><div className="text-base sm:text-xl font-bold">{rentab}%</div></div>
+            <div><div className="text-indigo-100 text-xs">Остатки на складе</div><div className="text-base sm:text-xl font-bold">{mln(1284500000)}</div></div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-4 sm:gap-6">
         {/* Attention */}
         <div className="xl:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 border-b border-slate-100">
             <h3 className="font-semibold text-slate-800 text-sm flex items-center gap-2"><AlertTriangle size={16} className="text-rose-500" /> Требует внимания</h3>
             <Badge tone={attention.length ? "rose" : "green"}>{attention.length} шт.</Badge>
           </div>
           <div className="divide-y divide-slate-50">
             {attention.map((a, i) => (
-              <button key={i} onClick={a.action} className={"w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 border-l-4 " + (a.tone === "rose" ? "border-rose-400" : "border-amber-400")}>
+              <button key={i} onClick={a.action} className={"w-full flex items-center gap-3 px-4 sm:px-5 py-3 text-left hover:bg-slate-50 border-l-4 min-h-[52px] " + (a.tone === "rose" ? "border-rose-400" : "border-amber-400")}>
                 <span className={"w-8 h-8 rounded-xl flex items-center justify-center shrink-0 " + (a.tone === "rose" ? "bg-rose-50 text-rose-600" : "bg-amber-50 text-amber-600")}><a.icon size={15} /></span>
-                <div className="flex-1 min-w-0"><div className="text-sm font-medium text-slate-800 truncate">{a.text}</div><div className="text-xs text-slate-400">{a.sub}</div></div>
+                <div className="flex-1 min-w-0"><div className="text-sm font-medium text-slate-800 truncate">{a.text}</div><div className="text-xs text-slate-400 truncate">{a.sub}</div></div>
                 <ChevronRight size={16} className="text-slate-300 shrink-0" />
               </button>
             ))}
@@ -315,11 +316,11 @@ function Dashboard({ go }) {
               );
             })}
           </div>
-          <button onClick={() => go("stats")} className="mt-4 w-full text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-xl">Открыть продажников →</button>
+          <button onClick={() => go("stats")} className="mt-4 w-full text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 sm:py-1.5 rounded-xl min-h-[44px] sm:min-h-0">Открыть продажников →</button>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         <div className="xl:col-span-2">
           <Card title="Выручка по месяцам, млн сум">
             <div style={{ height: 230 }}>
@@ -356,13 +357,13 @@ function Dashboard({ go }) {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 border-b border-slate-100">
           <h3 className="font-semibold text-slate-800 text-sm">Последние движения</h3>
           <div className="flex items-center gap-2">
             <span className="text-xs text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">План к закупке: {Math.round(planTonsTotal * 1.1)} т</span>
           </div>
         </div>
-        <div className="p-5">
+        <div className="p-4 sm:p-5">
           <div className="relative pl-5 border-l-2 border-slate-100 space-y-5">
             {movements.map((m, i) => (
               <div key={i} className="relative">
@@ -386,9 +387,9 @@ function OrderCell({ orderable, onAdd }) {
   const [done, setDone] = useState(false);
   if (!orderable) return <span className="text-xs text-slate-400 italic">Продукт не может быть заказан</span>;
   return (
-    <div className="flex items-center gap-2">
-      <input type="number" min="1" value={qty} onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))} className="w-16 border border-slate-200 rounded-xl px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
-      <button onClick={() => { onAdd(qty); setDone(true); setTimeout(() => setDone(false), 1300); }} className={"text-xs font-medium px-3 py-1.5 rounded-xl whitespace-nowrap " + (done ? "bg-emerald-600 text-white" : "bg-indigo-600 hover:bg-indigo-700 text-white")}>{done ? "✓ В заказе" : "Заказать"}</button>
+    <div className="flex items-center gap-2 flex-wrap">
+      <input type="number" min="1" value={qty} onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))} className="w-16 border border-slate-200 rounded-xl px-2 py-2 sm:py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 min-h-[44px] sm:min-h-0" />
+      <button onClick={() => { onAdd(qty); setDone(true); setTimeout(() => setDone(false), 1300); }} className={"text-xs font-medium px-3 py-2 sm:py-1.5 rounded-xl whitespace-nowrap min-h-[44px] sm:min-h-0 " + (done ? "bg-emerald-600 text-white" : "bg-indigo-600 hover:bg-indigo-700 text-white")}>{done ? "✓ В заказе" : "Заказать"}</button>
     </div>
   );
 }
@@ -401,16 +402,16 @@ function CatalogScreen() {
   const rows = catalog.filter((p) => (p.en + p.ru + p.maker).toLowerCase().includes(q.toLowerCase()));
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-5 py-3 flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-1.5 text-sm text-slate-500"><Search size={15} /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск по продукту, производителю…" className="bg-transparent focus:outline-none w-56" /></div>
-        <div className="text-xs text-slate-500 border-l border-slate-200 pl-4">Курс на 07.07.2026: <span className="font-semibold text-slate-700">€ 1 = 13 720</span> · <span className="font-semibold text-slate-700">$ 1 = 12 610</span> сум</div>
-        <div className="ml-auto flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sm"><ShoppingCart size={17} className="text-indigo-600" /><span className="text-slate-600">В заказе: <b className="text-slate-800">{positions} поз.</b></span>{positions > 0 && <span className="text-slate-400">· {money(totalSum)}</span>}</div>
-          <button className={"text-xs font-medium px-3 py-1.5 rounded-xl " + (positions ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "bg-slate-100 text-slate-400")}>Оформить заказ</button>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 sm:px-5 py-3 flex flex-wrap items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-2 sm:py-1.5 text-sm text-slate-500 w-full sm:w-auto"><Search size={15} className="shrink-0" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск по продукту, производителю…" className="bg-transparent focus:outline-none w-full sm:w-56 min-w-0" /></div>
+        <div className="text-xs text-slate-500 border-l border-slate-200 pl-4 hidden md:block">Курс на 07.07.2026: <span className="font-semibold text-slate-700">€ 1 = 13 720</span> · <span className="font-semibold text-slate-700">$ 1 = 12 610</span> сум</div>
+        <div className="flex items-center gap-3 w-full sm:w-auto sm:ml-auto flex-wrap">
+          <div className="flex items-center gap-2 text-sm"><ShoppingCart size={17} className="text-indigo-600 shrink-0" /><span className="text-slate-600">В заказе: <b className="text-slate-800">{positions} поз.</b></span>{positions > 0 && <span className="text-slate-400">· {money(totalSum)}</span>}</div>
+          <button className={"text-xs font-medium px-3 py-2 sm:py-1.5 rounded-xl min-h-[44px] sm:min-h-0 " + (positions ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "bg-slate-100 text-slate-400")}>Оформить заказ</button>
         </div>
       </div>
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-slate-100"><h3 className="font-semibold text-slate-800 text-sm">Каталог продукции</h3></div>
+        <div className="px-4 sm:px-5 py-3 sm:py-3.5 border-b border-slate-100"><h3 className="font-semibold text-slate-800 text-sm">Каталог продукции</h3></div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-100"><tr><Th>Продукт</Th><Th>Серия</Th><Th>CoA</Th><Th>Класс опасности / SDS</Th><Th>Регистрация</Th><Th>Производитель</Th><Th>Страна</Th><Th right>Цена</Th><Th>Создать заказ</Th></tr></thead>
@@ -441,7 +442,7 @@ function CatalogScreen() {
 function WarehouseScreen() {
   return (
     <TableScreen title="Остатки на складе" action={<AddBtn label="Новый приход" />}
-      foot={<div className="px-5 py-3 bg-slate-50 border-t border-slate-100 text-xs text-slate-500 flex flex-col gap-1.5"><span className="flex items-center gap-2"><Lock size={14} className="text-indigo-600 shrink-0" /> «Доступно» = физический остаток минус товар в брони. Забронированное списывается сразу — двое операторов не смогут продать одну и ту же единицу.</span><span className="flex items-center gap-2"><Clock size={14} className="text-amber-600 shrink-0" /><b className="text-amber-700">Предложено BRONUS:</b> контроль сроков годности (FEFO) — партии с близким сроком подсвечиваются, чтобы продать их первыми.</span></div>}>
+      foot={<div className="px-4 sm:px-5 py-3 bg-slate-50 border-t border-slate-100 text-xs text-slate-500 flex flex-col gap-1.5"><span className="flex items-center gap-2"><Lock size={14} className="text-indigo-600 shrink-0" /> «Доступно» = физический остаток минус товар в брони. Забронированное списывается сразу — двое операторов не смогут продать одну и ту же единицу.</span><span className="flex items-center gap-2"><Clock size={14} className="text-amber-600 shrink-0" /><b className="text-amber-700">Предложено BRONUS:</b> контроль сроков годности (FEFO) — партии с близким сроком подсвечиваются, чтобы продать их первыми.</span></div>}>
       <table className="w-full">
         <thead className="bg-slate-50 border-b border-slate-100"><tr><Th>Партия</Th><Th>Химпродукт</Th><Th right>Физ.</Th><Th right>В брони</Th><Th right>Доступно</Th><Th>Уровень</Th><Th>Срок годности</Th><Th right>Цена</Th></tr></thead>
         <tbody className="divide-y divide-slate-100">
@@ -475,11 +476,11 @@ function InventoryScreen() {
   const diffs = inventoryRows.filter((r) => r.fact !== r.acc).length;
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-wrap items-center gap-6">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-wrap items-center gap-4 sm:gap-6">
         <div><div className="text-xs text-slate-400">Ведомость</div><div className="font-semibold text-slate-800">ИНВ-0009 · Основной склад</div></div>
         <div><div className="text-xs text-slate-400">Дата</div><div className="font-semibold text-slate-800">18.06.2026</div></div>
         <div><div className="text-xs text-slate-400">Ответственный</div><div className="font-semibold text-slate-800">Ботир Р.</div></div>
-        <div className="ml-auto flex items-center gap-3"><Badge tone={diffs ? "amber" : "green"}>{diffs ? diffs + " расхождения" : "без расхождений"}</Badge><button className="text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-xl">Завершить и скорректировать</button></div>
+        <div className="ml-auto flex items-center gap-3 flex-wrap"><Badge tone={diffs ? "amber" : "green"}>{diffs ? diffs + " расхождения" : "без расхождений"}</Badge><button className="text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-2 sm:py-1.5 rounded-xl min-h-[44px] sm:min-h-0">Завершить и скорректировать</button></div>
       </div>
       <TableScreen title="Пересчёт позиций">
         <table className="w-full">
@@ -503,7 +504,7 @@ function InventoryScreen() {
 }
 function MovementsScreen() {
   return (
-    <TableScreen title="Приход и расход" action={<div className="flex gap-2"><AddBtn label="Приход" /><button className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl"><Plus size={14} /> Расход</button></div>}>
+    <TableScreen title="Приход и расход" action={<div className="flex gap-2 flex-wrap"><AddBtn label="Приход" /><button className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-2 sm:py-1.5 rounded-xl min-h-[44px] sm:min-h-0"><Plus size={14} /> Расход</button></div>}>
       <table className="w-full">
         <thead className="bg-slate-50 border-b border-slate-100"><tr><Th>Дата</Th><Th>Документ</Th><Th>Химпродукт</Th><Th>Ответственный</Th><Th right>Кол-во</Th></tr></thead>
         <tbody className="divide-y divide-slate-100">
@@ -519,14 +520,14 @@ function ReservationsScreen() {
   const tone = (s) => (s === "Активна" ? "teal" : s === "Выписана" ? "green" : s === "Просрочена" ? "rose" : "slate");
   return (
     <TableScreen title="Бронь → Выписка" action={<AddBtn label="Новая бронь" />}
-      foot={<div className="px-5 py-3 bg-slate-50 border-t border-slate-100 text-xs text-slate-500 flex flex-col gap-1.5"><span className="flex items-center gap-2"><Lock size={14} className="text-amber-600 shrink-0" /> Бронь сразу списывает товар из доступного остатка и держит его до выписки или отмены (защита от двойной продажи).</span><span className="flex items-center gap-2"><ShieldCheck size={14} className="text-indigo-600 shrink-0" /> При выписке счёт-фактура (ЭСФ) автоматически уходит в Didox.</span></div>}>
+      foot={<div className="px-4 sm:px-5 py-3 bg-slate-50 border-t border-slate-100 text-xs text-slate-500 flex flex-col gap-1.5"><span className="flex items-center gap-2"><Lock size={14} className="text-amber-600 shrink-0" /> Бронь сразу списывает товар из доступного остатка и держит его до выписки или отмены (защита от двойной продажи).</span><span className="flex items-center gap-2"><ShieldCheck size={14} className="text-indigo-600 shrink-0" /> При выписке счёт-фактура (ЭСФ) автоматически уходит в Didox.</span></div>}>
       <table className="w-full">
         <thead className="bg-slate-50 border-b border-slate-100"><tr><Th>Документ</Th><Th>Клиент</Th><Th>Химпродукт</Th><Th right>Сумма</Th><Th>Срок</Th><Th right>Статус</Th><Th right>Действие</Th></tr></thead>
         <tbody className="divide-y divide-slate-100">
           {reservations.map((r) => (
             <tr key={r.doc} className="hover:bg-slate-50">
               <Td><span className="font-mono text-xs text-slate-500">{r.doc}</span></Td><Td className="font-medium text-slate-800">{r.client}</Td><Td className="text-slate-600">{r.name}</Td><Td right className="font-semibold">{money(r.sum)}</Td><Td className="text-slate-400 text-xs">{r.exp}</Td><Td right><Badge tone={tone(r.status)}>{r.status}</Badge></Td>
-              <Td right>{r.status === "Активна" ? <div className="inline-flex gap-1.5"><button className="text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 px-2.5 py-1 rounded-xl inline-flex items-center gap-1">Выписать <ChevronRight size={13} /></button><button className="text-xs font-medium text-slate-500 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-xl">Отменить</button></div> : <span className="text-xs text-slate-400 inline-flex items-center gap-1"><FileText size={13} /> ЭСФ отправлен</span>}</Td>
+              <Td right>{r.status === "Активна" ? <div className="inline-flex gap-1.5 flex-wrap justify-end"><button className="text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 px-2.5 py-2 sm:py-1 rounded-xl inline-flex items-center gap-1 min-h-[44px] sm:min-h-0">Выписать <ChevronRight size={13} /></button><button className="text-xs font-medium text-slate-500 bg-slate-100 hover:bg-slate-200 px-2.5 py-2 sm:py-1 rounded-xl min-h-[44px] sm:min-h-0">Отменить</button></div> : <span className="text-xs text-slate-400 inline-flex items-center gap-1"><FileText size={13} /> ЭСФ отправлен</span>}</Td>
             </tr>
           ))}
         </tbody>
@@ -549,7 +550,7 @@ function BatchesScreen() {
     </TableScreen>
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100"><h3 className="font-semibold text-slate-800 text-sm">Себестоимость импортной партии (landed cost)</h3><Badge tone="amber">предложено BRONUS</Badge></div>
-      <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <div className="text-xs text-slate-400 mb-2">Партия 20260612-0037 · Перекись водорода 37% (Импорт)</div>
           <div className="space-y-2 text-sm">
@@ -576,7 +577,7 @@ function InvestorsScreen() {
       <p className="text-sm text-slate-500">Каждый инвестор видит, в какие именно партии вложены его деньги и какой доход они принесли.</p>
       {investors.map((inv) => (
         <div key={inv.name} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="flex flex-wrap items-center gap-6 px-5 py-4 border-b border-slate-100">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 px-5 py-4 border-b border-slate-100">
             <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">{inv.name.slice(0, 1)}</div>
             <div><div className="text-xs text-slate-400">Инвестор</div><div className="font-semibold text-slate-800">{inv.name}</div></div>
             <div className="ml-auto flex gap-8"><div className="text-right"><div className="text-xs text-slate-400">Вложено всего</div><div className="font-bold text-slate-800">{money(inv.invested)}</div></div><div className="text-right"><div className="text-xs text-slate-400">Доход</div><div className="font-bold text-emerald-600 flex items-center gap-1 justify-end"><TrendingUp size={15} />+{money(inv.income)}</div></div></div>
@@ -630,7 +631,7 @@ function ClientsScreen() {
   const c = clients[sel];
   const statusTone = (s) => (s.includes("Использован") ? "green" : s.includes("Ожидает") ? "amber" : "rose");
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
       <Card title="Клиенты" action={<AddBtn label="Клиент" />}>
         <div className="space-y-1">
           {clients.map((cl, i) => {
@@ -644,9 +645,9 @@ function ClientsScreen() {
           })}
         </div>
       </Card>
-      <div className="xl:col-span-2 space-y-6">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-          <div className="flex items-start justify-between">
+      <div className="xl:col-span-2 space-y-4 sm:space-y-6">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+          <div className="flex items-start justify-between flex-wrap gap-3">
             <div><h3 className="font-bold text-slate-800 text-lg">{c.name}</h3><div className="text-sm text-slate-500">{c.legalName}</div></div>
             <div className="text-right"><div className="text-xs text-slate-400">Оборот</div><div className="font-bold text-slate-800">{money(c.turnover)}</div></div>
           </div>
@@ -660,11 +661,11 @@ function ClientsScreen() {
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3 bg-slate-50 rounded-xl px-4 py-3">
             <UserCog size={18} className="text-indigo-600 shrink-0" /><div className="flex-1"><div className="text-xs text-slate-400">Ответственный сотрудник</div><div className="font-semibold text-slate-800">{c.owner}</div></div>
-            <button className="text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl inline-flex items-center gap-1"><RefreshCw size={13} /> Сменить (с указанием причины)</button>
+            <button className="text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 sm:py-1.5 rounded-xl inline-flex items-center gap-1 min-h-[44px] sm:min-h-0"><RefreshCw size={13} /> Сменить (с указанием причины)</button>
           </div>
           {c.history.length > 0 && (
             <div className="mt-4"><div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">История смены ответственного</div>
-              <div className="space-y-2">{c.history.map((h, i) => (<div key={i} className="flex gap-3 text-sm bg-white border border-slate-100 rounded-xl px-3 py-2"><span className="text-xs font-mono text-slate-400 pt-0.5 w-20 shrink-0">{h.date}</span><span className="text-slate-700"><b>{h.prev}</b> → <b>{h.who}</b><div className="text-xs text-slate-400">Причина: {h.reason}</div></span></div>))}</div>
+              <div className="space-y-2">{c.history.map((h, i) => (<div key={i} className="flex flex-col sm:flex-row gap-2 sm:gap-3 text-sm bg-white border border-slate-100 rounded-xl px-3 py-2"><span className="text-xs font-mono text-slate-400 w-20 shrink-0">{h.date}</span><span className="text-slate-700"><b>{h.prev}</b> → <b>{h.who}</b><div className="text-xs text-slate-400">Причина: {h.reason}</div></span></div>))}</div>
             </div>
           )}
         </div>
@@ -701,7 +702,7 @@ function ClientsScreen() {
             </div>
           );
         })()}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <ReconBlock title="Акт сверки — клиент (Didox)" aLabel="Отгружено" bLabel="Оплачено" a={c.shipped} b={c.paid} />
           <Card title="Последние заказы"><div className="space-y-2">{c.orders.map((o, i) => (<div key={i} className="flex justify-between items-center text-sm"><span className="text-slate-600"><span className="font-mono text-xs text-slate-400 mr-2">{o.d}</span>{o.doc}</span><span className="font-medium">{money(o.sum)}</span></div>))}</div></Card>
         </div>
@@ -756,7 +757,7 @@ function SuppliersScreen() {
   const [sel, setSel] = useState(0);
   const s = suppliers[sel];
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
       <Card title="Поставщики" action={<AddBtn label="Поставщик" />}>
         <div className="space-y-1">
           {suppliers.map((sp, i) => (
@@ -792,7 +793,7 @@ function SuppliersScreen() {
             </tbody>
           </table>
         </TableScreen>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <ReconBlock title="Акт сверки — поставщик (Didox)" aLabel="Получено от поставщика" bLabel="Оплачено поставщику" a={s.received} b={s.paid} />
           <Card title="Динамика цен"><p className="text-sm text-slate-600">Стрелки в истории показывают, дорожает (▲) или дешевеет (▼) продукт относительно прошлой закупки — удобно ловить момент выгодной цены и планировать закупки.</p></Card>
         </div>
@@ -818,7 +819,7 @@ function SalesStatsScreen() {
   }));
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         <div className="xl:col-span-2">
           <Card title="Продажи по тоннажу, т/мес (по продажникам)">
             <div style={{ height: 260 }}>
@@ -852,7 +853,7 @@ function SalesStatsScreen() {
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-5 py-3.5 border-b border-slate-100"><h3 className="font-semibold text-slate-800 text-sm">Предложение руководителя по плану</h3></div>
-        <div className="p-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="p-5 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <div className="text-xs font-medium text-slate-500 mb-2">Продажник</div>
             <div className="space-y-1">
@@ -878,7 +879,7 @@ function SalesStatsScreen() {
             <div className="mt-3 flex items-center justify-between text-sm"><span className="text-slate-500">Сейчас</span><span className="font-semibold text-slate-700">{curMonthly.toFixed(0)} т/мес · 3 мес</span></div>
             <div className="mt-1 flex items-center justify-between text-sm"><span className="text-slate-500">Предложение</span><span className="font-bold text-indigo-700">{propMonthly.toFixed(0)} т/мес · {months} мес</span></div>
             <div className="mt-2 text-xs text-slate-500">Итого объём: <b>{person.planTons + addTons} т</b> вместо {person.planTons} т, но темп {propMonthly < curMonthly ? "ниже" : "выше"} — {propMonthly.toFixed(0)} против {curMonthly.toFixed(0)} т/мес.</div>
-            <button className="mt-3 w-full text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-xl">Отправить предложение</button>
+            <button className="mt-3 w-full text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-2.5 sm:py-2 rounded-xl min-h-[44px]">Отправить предложение</button>
           </div>
         </div>
       </div>
@@ -922,10 +923,10 @@ function DiscountScreen() {
   const discountAmount = Math.round(orderSum * applied / 100);
   const finalSum = orderSum - discountAmount;
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
       <div className="xl:col-span-2">
         <TableScreen title="Скидка от количества (применяется к сумме заказа)"
-          foot={<div className="px-5 py-3 bg-slate-50 border-t border-slate-100 text-xs text-slate-500">Право на скидку и её размер зависят от количества в заказе; сам процент применяется к общей сумме заказа.</div>}>
+          foot={<div className="px-4 sm:px-5 py-3 bg-slate-50 border-t border-slate-100 text-xs text-slate-500">Право на скидку и её размер зависят от количества в заказе; сам процент применяется к общей сумме заказа.</div>}>
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-100"><tr><Th>Количество в заказе (меш / канистр)</Th><Th right>Скидка на сумму заказа</Th></tr></thead>
             <tbody className="divide-y divide-slate-100">
@@ -938,11 +939,11 @@ function DiscountScreen() {
       </div>
       <Card title="Калькулятор скидки">
         <label className="block text-xs font-medium text-slate-500 mb-1">Количество в заказе</label>
-        <input type="number" value={qty} onChange={(e) => setQty(Number(e.target.value) || 0)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+        <input type="number" value={qty} onChange={(e) => setQty(Number(e.target.value) || 0)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 sm:py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-300 min-h-[44px]" />
         <label className="block text-xs font-medium text-slate-500 mb-1">Сумма заказа, сум</label>
-        <input type="number" value={orderSum} onChange={(e) => setOrderSum(Number(e.target.value) || 0)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+        <input type="number" value={orderSum} onChange={(e) => setOrderSum(Number(e.target.value) || 0)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 sm:py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-300 min-h-[44px]" />
         <label className="block text-xs font-medium text-slate-500 mb-1">Сотрудник</label>
-        <select value={emp} onChange={(e) => setEmp(Number(e.target.value))} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm mb-5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">{staff.map((s, i) => <option key={i} value={i}>{s.name} (лимит {s.limit}%)</option>)}</select>
+        <select value={emp} onChange={(e) => setEmp(Number(e.target.value))} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 sm:py-2 text-sm mb-5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 min-h-[44px]">{staff.map((s, i) => <option key={i} value={i}>{s.name} (лимит {s.limit}%)</option>)}</select>
         <div className="rounded-2xl bg-slate-900 text-white p-4 space-y-2">
           <div className="flex justify-between text-sm text-slate-300"><span>Порог по количеству</span><span>{tier.pct}%</span></div>
           <div className="flex justify-between text-sm text-slate-300"><span>Лимит сотрудника</span><span>{limit}%</span></div>
@@ -964,7 +965,7 @@ function ExpensesScreen() {
     <div className={"flex justify-between py-2 " + (opts.border ? "border-t border-slate-100" : "")}><span className={opts.strong ? "font-semibold text-slate-800" : "text-slate-500"}>{label}</span><span className={"font-semibold " + (opts.tone || "text-slate-800")}>{opts.minus ? "− " : ""}{money(val)}</span></div>
   );
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
       <Card title="Расходы за июнь" action={<AddBtn label="Добавить расход" />}>
         <table className="w-full"><tbody className="divide-y divide-slate-100">
           {expenses.map((e) => (<tr key={e.name}><Td className="font-medium text-slate-800">{e.name}<div className="text-xs text-slate-400 font-normal">{e.cat}</div></Td><Td right className="font-semibold">{money(e.sum)}</Td></tr>))}
@@ -1023,13 +1024,13 @@ function CalendarScreen() {
       <AddBtn label="Создать" />
       <div className="flex items-center gap-1">
         <button className="w-8 h-8 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-500"><ChevronLeft size={16} /></button>
-        <button className="text-sm font-medium text-slate-700 px-3 py-1.5 rounded-xl hover:bg-slate-100">Сегодня</button>
+        <button className="text-sm font-medium text-slate-700 px-3 py-2 sm:py-1.5 rounded-xl hover:bg-slate-100 min-h-[44px] sm:min-h-0">Сегодня</button>
         <button className="w-8 h-8 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-500"><ChevronRight size={16} /></button>
       </div>
       <div className="text-sm font-semibold text-slate-700">18 июня 2026</div>
       <div className="ml-auto flex rounded-xl border border-slate-200 overflow-hidden">
         {[["day", "День"], ["week", "Неделя"], ["month", "Месяц"]].map(([v, l]) => (
-          <button key={v} onClick={() => setView(v)} className={"px-3 py-1.5 text-sm " + (view === v ? "bg-indigo-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50")}>{l}</button>
+          <button key={v} onClick={() => setView(v)} className={"px-3 py-2 sm:py-1.5 text-sm min-h-[44px] sm:min-h-0 " + (view === v ? "bg-indigo-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50")}>{l}</button>
         ))}
       </div>
     </div>
@@ -1144,7 +1145,7 @@ function PurchaseScreen() {
   return (
     <div>
       <ProposedBanner text="Автозакупка: план продаж в тоннах → потребность → дефицит → черновик заявки поставщику." />
-      <TableScreen title="Рекомендации к закупке (по плану и остаткам)" action={<button className="text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-xl inline-flex items-center gap-1"><PackagePlus size={14} /> Сформировать заявки поставщикам</button>}
+      <TableScreen title="Рекомендации к закупке (по плану и остаткам)" action={<button className="text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-2 sm:py-1.5 rounded-xl inline-flex items-center gap-1 min-h-[44px] sm:min-h-0"><PackagePlus size={14} /> Сформировать заявки поставщикам</button>}
         foot={<div className="px-5 py-3 bg-slate-50 border-t border-slate-100 text-xs text-slate-500">«Спрос» берётся из плана продаж (экран «Статистика продаж»). Система сама предлагает объём закупки и поставщика — остаётся подтвердить заявку.</div>}>
         <table className="w-full">
           <thead className="bg-slate-50 border-b border-slate-100"><tr><Th>Химпродукт</Th><Th right>Доступно</Th><Th right>min</Th><Th right>Спрос (план)</Th><Th right>Дефицит</Th><Th right>К закупке</Th><Th>Поставщик</Th><Th right>Действие</Th></tr></thead>
@@ -1183,7 +1184,7 @@ function NotificationsScreen() {
   return (
     <div>
       <ProposedBanner text="Уведомления в Telegram по ключевым событиям — руководитель и ответственные узнают сразу." />
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         <div className="xl:col-span-2">
           <Card title="Лента событий">
             <div className="space-y-3">
@@ -1259,7 +1260,7 @@ function AccessScreen() {
   return (
     <div>
       <ProposedBanner text="Роли и права доступа + журнал действий — видно, кто что менял. Критично, когда операторов несколько." />
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         <TableScreen title="Роли и права" action={<AddBtn label="Роль" />}>
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-100"><tr><Th>Роль</Th><Th right>Польз.</Th><Th>Права</Th></tr></thead>
@@ -1334,13 +1335,19 @@ const NAV = NAV_GROUPS.flatMap((g) => g.items);
 
 function NotifBell() {
   const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
   return (
-    <div className="relative">
-      <button onClick={() => setOpen((v) => !v)} className="relative w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-500">
+    <div className="relative" ref={ref}>
+      <button onClick={() => setOpen((v) => !v)} className="relative w-10 h-10 sm:w-9 sm:h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-500 shrink-0" aria-label="Notifications">
         <Bell size={18} /><span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full" />
       </button>
       {open && (
-        <div className="absolute right-0 top-11 w-80 bg-white border border-slate-200 rounded-2xl shadow-lg z-10 overflow-hidden">
+        <div className="absolute right-0 top-12 w-80 max-w-[calc(100vw-2rem)] bg-white border border-slate-200 rounded-2xl shadow-lg z-10 overflow-hidden">
           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between"><span className="font-semibold text-slate-800 text-sm">Уведомления</span><Badge tone="amber">предложено BRONUS</Badge></div>
           <div className="max-h-80 overflow-y-auto divide-y divide-slate-50">
             {notifications.map((n, i) => (
@@ -1360,16 +1367,59 @@ function NotifBell() {
 export default function App() {
   const [active, setActive] = useState("dash");
   const [collapsed, setCollapsed] = useState({});
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarRef = useRef(null);
   const current = NAV.find((n) => n.id === active);
   const Screen = current.screen;
+
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && sidebarOpen) {
+        closeSidebar();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [sidebarOpen, closeSidebar]);
+
+  useEffect(() => {
+    closeSidebar();
+  }, [active, closeSidebar]);
+
+  const handleSetActive = (id) => {
+    setActive(id);
+  };
+
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
-      <aside className="w-64 bg-slate-950 text-slate-300 flex flex-col shrink-0">
-        <div className="px-5 py-5 border-b border-slate-800">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity"
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        ref={sidebarRef}
+        className={`fixed md:relative inset-y-0 left-0 z-50 w-64 bg-slate-950 text-slate-300 flex flex-col shrink-0 transform transition-transform duration-300 ease-in-out md:transform-none ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+        aria-label="Main navigation"
+      >
+        <div className="px-5 py-5 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-600 flex items-center justify-center text-white font-black text-sm shadow-sm">B</div>
             <div><div className="text-white font-bold tracking-tight leading-none text-lg">BRONUS</div><div className="text-xs text-slate-500 mt-0.5">Оптовая химия</div></div>
           </div>
+          <button
+            onClick={closeSidebar}
+            className="md:hidden w-8 h-8 rounded-xl hover:bg-slate-800 flex items-center justify-center text-slate-400"
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
         </div>
         <nav className="flex-1 py-3 px-2.5 overflow-y-auto">
           {NAV_GROUPS.map((g) => {
@@ -1384,7 +1434,7 @@ export default function App() {
                     {g.items.map((n) => {
                       const on = n.id === active;
                       return (
-                        <button key={n.id} onClick={() => setActive(n.id)} className={"w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors " + (on ? "bg-indigo-500 text-slate-900 font-semibold" : "hover:bg-slate-800 hover:text-white")}>
+                        <button key={n.id} onClick={() => handleSetActive(n.id)} className={"w-full flex items-center gap-2.5 px-3 py-2.5 md:py-2 rounded-xl text-sm transition-colors " + (on ? "bg-indigo-500 text-slate-900 font-semibold" : "hover:bg-slate-800 hover:text-white")}>
                           <n.icon size={16} className={on ? "text-slate-900" : "text-slate-400"} /><span className="flex-1 text-left">{n.label}</span>
                           {n.neu && <span className={"text-xs font-bold px-1.5 py-0.5 rounded " + (on ? "bg-slate-900 text-amber-300" : "bg-amber-400 text-slate-900")}>NEW</span>}
                         </button>
@@ -1398,16 +1448,28 @@ export default function App() {
         </nav>
         <div className="px-4 py-3 border-t border-slate-800 flex items-center gap-2 text-xs"><ShieldCheck size={15} className="text-emerald-400 shrink-0" /><span>Didox — подключён</span></div>
       </aside>
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shrink-0">
-          <div><div className="text-xs text-slate-400">Компания BRONUS · версия 2 — расширенная (NEW = предложено нами)</div><h1 className="text-lg font-bold text-slate-800 leading-tight">{current.label}</h1></div>
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-1.5 text-sm text-slate-400 w-56"><Search size={15} /> Поиск по продукту, партии…</div>
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <header className="bg-white border-b border-slate-200 px-3 sm:px-4 md:px-6 py-3 flex items-center justify-between shrink-0 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-500 shrink-0"
+              aria-label="Open menu"
+            >
+              <Menu size={22} />
+            </button>
+            <div className="min-w-0">
+              <div className="text-xs text-slate-400 truncate hidden sm:block">Компания BRONUS · версия 2 — расширенная (NEW = предложено нами)</div>
+              <h1 className="text-base sm:text-lg font-bold text-slate-800 leading-tight truncate">{current.label}</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="hidden lg:flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-1.5 text-sm text-slate-400 w-56"><Search size={15} /> <span className="truncate">Поиск по продукту, партии…</span></div>
             <NotifBell />
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-sm font-semibold shadow-sm">АК</div>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-sm font-semibold shadow-sm shrink-0">АК</div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6"><Screen go={setActive} /></main>
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6"><Screen go={handleSetActive} /></main>
       </div>
     </div>
   );
