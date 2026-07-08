@@ -167,6 +167,25 @@ const staffSales = [
   { name: "Санжар Т.", planTons: 240, months: [{ m: "Янв", t: 55 }, { m: "Фев", t: 60 }, { m: "Мар", t: 62 }, { m: "Апр", t: 71 }, { m: "Май", t: 75 }, { m: "Июн", t: 80 }] },
   { name: "Дилноза К.", planTons: 150, months: [{ m: "Янв", t: 30 }, { m: "Фев", t: 34 }, { m: "Мар", t: 38 }, { m: "Апр", t: 40 }, { m: "Май", t: 36 }, { m: "Июн", t: 44 }] },
 ];
+const salesProductStats = [
+  { name: "Перекись водорода 37%", revenue: 168000000, profit: 31000000, paid: 152000000, debt: 16000000, qty: 402, stock: 520, color: C.sky },
+  { name: "Сода каустическая NaOH", revenue: 142000000, profit: 35000000, paid: 137000000, debt: 5000000, qty: 386, stock: 480, color: C.emerald },
+  { name: "Диоксид титана R-2195", revenue: 96000000, profit: 18000000, paid: 75000000, debt: 21000000, qty: 112, stock: 64, color: C.violet },
+  { name: "Сульфат меди", revenue: 74000000, profit: 12000000, paid: 69000000, debt: 5000000, qty: 122, stock: 210, color: C.amber },
+  { name: "Сода кальцинированная", revenue: 58000000, profit: 8000000, paid: 53000000, debt: 5000000, qty: 216, stock: 90, color: C.rose },
+];
+const salesBatchStats = [
+  { p: "HP-20260612", product: "Перекись водорода", invest: 130000000, revenue: 168000000, profit: 31000000, soldPct: 77, status: "Активная" },
+  { p: "KS-20260618", product: "Сода каустическая", invest: 169000000, revenue: 142000000, profit: 35000000, soldPct: 64, status: "Активная" },
+  { p: "TIO2-20260610", product: "Диоксид титана", invest: 178000000, revenue: 96000000, profit: 18000000, soldPct: 54, status: "Медленно" },
+  { p: "CS-20260607", product: "Сульфат меди", invest: 64000000, revenue: 74000000, profit: 12000000, soldPct: 88, status: "Закрывается" },
+];
+const salesFunnelStats = [
+  { name: "Лиды", value: 156, fill: C.teal },
+  { name: "Переговоры", value: 94, fill: C.sky },
+  { name: "Бронь", value: 58, fill: C.amber },
+  { name: "Сделка", value: 41, fill: C.emerald },
+];
 
 const calEvents = [
   { day: 0, s: 9, e: 9.5, title: "Утреннее собрание", tone: "sky" },
@@ -904,6 +923,204 @@ function SalesStatsScreen() {
 }
 
 // ---------- Скидки ----------
+function SalesAnalyticsScreen() {
+  const [view, setView] = useState("products");
+  const totalRevenue = salesProductStats.reduce((a, p) => a + p.revenue, 0);
+  const totalProfit = salesProductStats.reduce((a, p) => a + p.profit, 0);
+  const totalPaid = salesProductStats.reduce((a, p) => a + p.paid, 0);
+  const totalDebt = salesProductStats.reduce((a, p) => a + p.debt, 0);
+  const companyByMonth = staffSales[0].months.map((_, i) => ({
+    m: staffSales[0].months[i].m,
+    "Азиза Ю.": staffSales[0].months[i].t,
+    "Санжар Т.": staffSales[1].months[i].t,
+    "Дилноза К.": staffSales[2].months[i].t,
+  }));
+  const managerRows = staff.map((s) => {
+    const tonRow = staffSales.find((x) => x.name === s.name);
+    const tons = tonRow ? tonRow.months.reduce((a, m) => a + m.t, 0) : 0;
+    const progress = Math.round((s.done / s.plan) * 100);
+    const profit = Math.round((bonusMargins[s.name] || 0));
+    return { ...s, tons, progress, profit };
+  });
+
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      <div className="bg-slate-950 rounded-2xl p-4 sm:p-5 text-white overflow-hidden relative">
+        <div className="absolute right-0 top-0 h-full w-1/2 bg-gradient-to-l from-indigo-500/25 to-transparent" />
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="text-xs uppercase tracking-wide text-indigo-200 font-semibold">Отдел продаж</div>
+            <h2 className="text-2xl sm:text-3xl font-bold mt-1">Расширенная статистика продаж</h2>
+            <p className="text-sm text-slate-300 mt-2 max-w-3xl">Теперь видно не только общий график, а продукты, партии, менеджеров, оплату, долг, маржу и остатки.</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 min-w-0 lg:min-w-[560px]">
+            <div className="rounded-xl bg-white/10 p-3"><div className="text-xs text-slate-300">Выручка</div><div className="font-bold">{mln(totalRevenue)}</div></div>
+            <div className="rounded-xl bg-white/10 p-3"><div className="text-xs text-slate-300">Маржа</div><div className="font-bold text-emerald-300">{mln(totalProfit)}</div></div>
+            <div className="rounded-xl bg-white/10 p-3"><div className="text-xs text-slate-300">Оплачено</div><div className="font-bold text-sky-300">{mln(totalPaid)}</div></div>
+            <div className="rounded-xl bg-white/10 p-3"><div className="text-xs text-slate-300">Долг</div><div className="font-bold text-rose-300">{mln(totalDebt)}</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 w-full overflow-x-auto">
+        {[
+          ["products", "По продуктам"],
+          ["batches", "По партиям"],
+          ["managers", "По менеджерам"],
+          ["funnel", "Воронка"],
+        ].map(([id, label]) => (
+          <button key={id} onClick={() => setView(id)} className={"px-3.5 py-2 rounded-md text-sm font-medium whitespace-nowrap " + (view === id ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-50")}>{label}</button>
+        ))}
+      </div>
+
+      {view === "products" && (
+        <>
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+            <div className="xl:col-span-2">
+              <Card title="Выручка и маржа по продуктам">
+                <div style={{ height: 320 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={salesProductStats} layout="vertical" margin={{ top: 5, right: 16, left: 120, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" horizontal={false} />
+                      <XAxis type="number" tickFormatter={(v) => (v / 1000000).toFixed(0)} tick={{ fontSize: 12, fill: C.slate }} axisLine={false} tickLine={false} />
+                      <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: C.slate }} axisLine={false} tickLine={false} width={150} />
+                      <Tooltip formatter={(v, n) => [mln(Number(v)), n]} />
+                      <Bar dataKey="revenue" name="Выручка" radius={[0, 5, 5, 0]}>
+                        {salesProductStats.map((p) => <Cell key={p.name} fill={p.color} />)}
+                      </Bar>
+                      <Bar dataKey="profit" name="Маржа" fill={C.emerald} radius={[0, 5, 5, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
+            </div>
+            <Card title="Доля выручки">
+              <div style={{ height: 320 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={salesProductStats} dataKey="revenue" nameKey="name" innerRadius={68} outerRadius={108} paddingAngle={2}>
+                      {salesProductStats.map((p) => <Cell key={p.name} fill={p.color} />)}
+                    </Pie>
+                    <Tooltip formatter={(v) => mln(Number(v))} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          </div>
+
+          <TableScreen title="Детализация по продуктам">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-100"><tr><Th>Продукт</Th><Th right>Выручка</Th><Th right>Маржа</Th><Th right>Оплачено</Th><Th right>Долг</Th><Th right>Остаток</Th></tr></thead>
+              <tbody className="divide-y divide-slate-100">
+                {salesProductStats.map((p) => (
+                  <tr key={p.name} className="hover:bg-slate-50">
+                    <Td className="font-medium text-slate-800"><span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: p.color }} />{p.name}</Td>
+                    <Td right>{mln(p.revenue)}</Td>
+                    <Td right className="font-semibold text-emerald-700">{mln(p.profit)}</Td>
+                    <Td right>{mln(p.paid)}</Td>
+                    <Td right className="text-rose-600">{mln(p.debt)}</Td>
+                    <Td right>{p.stock}</Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableScreen>
+        </>
+      )}
+
+      {view === "batches" && (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          <Card title="Инвестиция, выручка и маржа по партиям">
+            <div style={{ height: 320 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={salesBatchStats}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
+                  <XAxis dataKey="p" tick={{ fontSize: 12, fill: C.slate }} axisLine={false} tickLine={false} />
+                  <YAxis tickFormatter={(v) => (v / 1000000).toFixed(0)} tick={{ fontSize: 12, fill: C.slate }} axisLine={false} tickLine={false} />
+                  <Tooltip formatter={(v, n) => [mln(Number(v)), n]} />
+                  <Area type="monotone" dataKey="invest" name="Инвестиция" stroke={C.amber} fill="#fef3c7" />
+                  <Area type="monotone" dataKey="revenue" name="Выручка" stroke={C.sky} fill="#e0f2fe" />
+                  <Area type="monotone" dataKey="profit" name="Маржа" stroke={C.emerald} fill="#dcfce7" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+          <TableScreen title="Контроль партий">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-100"><tr><Th>Партия</Th><Th>Продукт</Th><Th right>Продано</Th><Th>Статус</Th></tr></thead>
+              <tbody className="divide-y divide-slate-100">
+                {salesBatchStats.map((b) => (
+                  <tr key={b.p} className="hover:bg-slate-50"><Td className="font-semibold">{b.p}</Td><Td>{b.product}</Td><Td right>{b.soldPct}%</Td><Td><Badge tone={b.soldPct > 80 ? "green" : b.soldPct > 60 ? "teal" : "amber"}>{b.status}</Badge></Td></tr>
+                ))}
+              </tbody>
+            </table>
+          </TableScreen>
+        </div>
+      )}
+
+      {view === "managers" && (
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+          <div className="xl:col-span-2">
+            <Card title="Тоннаж по месяцам и менеджерам">
+              <div style={{ height: 320 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={companyByMonth}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" vertical={false} />
+                    <XAxis dataKey="m" tick={{ fontSize: 12, fill: C.slate }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 12, fill: C.slate }} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={(v, n) => [v + " т", n]} />
+                    <Bar dataKey="Азиза Ю." stackId="a" fill={C.teal} />
+                    <Bar dataKey="Санжар Т." stackId="a" fill={C.sky} />
+                    <Bar dataKey="Дилноза К." stackId="a" fill={C.amber} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          </div>
+          <Card title="Рейтинг выполнения">
+            <div className="space-y-4">
+              {managerRows.map((m) => (
+                <div key={m.name}>
+                  <div className="flex justify-between text-sm mb-1"><span className="font-semibold text-slate-800">{m.name}</span><span className="text-slate-500">{m.progress}%</span></div>
+                  <div className="h-2 rounded-full bg-slate-100 overflow-hidden"><div className="h-full bg-indigo-600 rounded-full" style={{ width: Math.min(m.progress, 120) + "%" }} /></div>
+                  <div className="mt-1 text-xs text-slate-500">{m.tons} т · маржа {mln(m.profit)}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {view === "funnel" && (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          <Card title="Воронка продаж">
+            <div style={{ height: 320 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={salesFunnelStats}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: C.slate }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 12, fill: C.slate }} axisLine={false} tickLine={false} />
+                  <Tooltip />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                    {salesFunnelStats.map((f) => <Cell key={f.name} fill={f.fill} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+          <Card title="Что важно руководителю">
+            <div className="space-y-3 text-sm text-slate-600">
+              <div className="rounded-xl bg-emerald-50 text-emerald-800 p-3">Сода каустическая даёт лучшую маржу и стабильную оплату.</div>
+              <div className="rounded-xl bg-sky-50 text-sky-800 p-3">Перекись водорода делает самый большой оборот, но по ней выше долг.</div>
+              <div className="rounded-xl bg-amber-50 text-amber-800 p-3">Диоксид титана продаётся медленнее, партию нужно контролировать отдельно.</div>
+            </div>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DiscountScreen() {
   const [qty, setQty] = useState(120);
   const [orderSum, setOrderSum] = useState(30000000);
@@ -1297,7 +1514,7 @@ const CatalogCombined = () => <TabsScreen tabs={[{ label: "Товары", conten
 const WarehouseCombined = () => <TabsScreen tabs={[{ label: "Остатки", content: <WarehouseScreen /> }, { label: "Приход и расход", content: <MovementsScreen /> }, { label: "Инвентаризация", content: <InventoryScreen /> }]} />;
 const FinanceCombined = () => <TabsScreen tabs={[{ label: "Расходы и прибыль", content: <ExpensesScreen /> }, { label: "Инвесторы", content: <InvestorsScreen /> }]} />;
 const SuppliersCombined = () => <TabsScreen tabs={[{ label: "Поставщики", content: <SuppliersScreen /> }, { label: "Заявки на закупку", content: <PurchaseScreen />, neu: true }]} />;
-const SalesTeamCombined = () => <TabsScreen tabs={[{ label: "Статистика продаж", content: <SalesStatsScreen /> }, { label: "Мотивация · бонусы", content: <BonusScreen />, neu: true }, { label: "Настройка скидок", content: <DiscountScreen /> }]} />;
+const SalesTeamCombined = () => <TabsScreen tabs={[{ label: "Расширенная статистика", content: <SalesAnalyticsScreen /> }, { label: "Мотивация · бонусы", content: <BonusScreen />, neu: true }, { label: "Настройка скидок", content: <DiscountScreen /> }]} />;
 
 // ---------- shell ----------
 const NAV_GROUPS = [
@@ -1314,7 +1531,7 @@ const NAV_GROUPS = [
   ]},
   { title: "Финансы и аналитика", items: [
     { id: "fin", label: "Финансы", icon: PiggyBank, screen: FinanceCombined },
-    { id: "stats", label: "Продажники", icon: BarChart3, screen: SalesTeamCombined, neu: true },
+    { id: "stats", label: "Отдел продаж", icon: BarChart3, screen: SalesTeamCombined, neu: true },
     { id: "price", label: "Цены конкурентов", icon: LineIcon, screen: PricesScreen },
   ]},
   { title: "Система", items: [
@@ -1355,13 +1572,80 @@ function NotifBell() {
   );
 }
 
+const LANGS = [
+  { id: "uz", label: "UZ" },
+  { id: "ru", label: "RU" },
+  { id: "en", label: "EN" },
+];
+const LOGIN_ROLES = [
+  { id: "owner", label: "Руководитель", desc: "Все разделы, финансы, аналитика, доступы", badge: "Full" },
+  { id: "seller", label: "Продажник", desc: "Клиенты, бронь, продажи, личный план", badge: "Sales" },
+  { id: "manager", label: "Менеджер", desc: "Склад, задачи, поставщики, контроль команды", badge: "Ops" },
+];
+const SHELL_TEXT = {
+  ru: { loginTitle: "Войти в BRONUS", loginHint: "Выберите роль для демонстрационного входа.", enter: "Войти", logout: "Выйти", role: "Роль", version: "Компания BRONUS · версия 2 — расширенная", search: "Поиск по продукту, партии…" },
+  uz: { loginTitle: "BRONUS tizimiga kirish", loginHint: "Demo kirish uchun rolni tanlang.", enter: "Kirish", logout: "Chiqish", role: "Rol", version: "BRONUS kompaniyasi · 2-versiya — kengaytirilgan", search: "Mahsulot yoki partiya qidirish…" },
+  en: { loginTitle: "Sign in to BRONUS", loginHint: "Choose a role for demo access.", enter: "Sign in", logout: "Sign out", role: "Role", version: "BRONUS company · version 2 — expanded", search: "Search product or batch…" },
+};
+
+function LanguageSwitch({ lang, setLang }) {
+  return (
+    <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+      {LANGS.map((l) => (
+        <button key={l.id} onClick={() => setLang(l.id)} className={"px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors " + (lang === l.id ? "bg-white text-indigo-700 shadow-sm" : "text-slate-500 hover:text-slate-800")}>{l.label}</button>
+      ))}
+    </div>
+  );
+}
+
+function LoginScreen({ lang, setLang, setRole }) {
+  const [selected, setSelected] = useState("owner");
+  const text = SHELL_TEXT[lang];
+  return (
+    <div className="min-h-screen bg-slate-100 text-slate-900 p-4 sm:p-6 flex flex-col">
+      <header className="max-w-5xl mx-auto w-full flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center font-black">B</div>
+          <div><div className="font-bold text-xl leading-none">BRONUS</div><div className="text-xs text-slate-500 mt-1">CRM</div></div>
+        </div>
+        <LanguageSwitch lang={lang} setLang={setLang} />
+      </header>
+      <main className="max-w-5xl mx-auto w-full flex-1 grid lg:grid-cols-[1fr_420px] gap-6 items-center py-8">
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm text-slate-600 shadow-sm mb-4"><Lock size={16} /> {text.role}</div>
+          <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-950">{text.loginTitle}</h1>
+          <p className="mt-3 text-slate-600 text-lg">{text.loginHint}</p>
+          <div className="mt-6 grid sm:grid-cols-3 gap-3">
+            {LOGIN_ROLES.map((r) => (
+              <button key={r.id} onClick={() => setSelected(r.id)} className={"text-left rounded-2xl border bg-white p-4 transition-colors " + (selected === r.id ? "border-indigo-500 ring-2 ring-indigo-100" : "border-slate-200 hover:border-slate-300")}>
+                <Badge tone={selected === r.id ? "teal" : "slate"}>{r.badge}</Badge>
+                <div className="font-bold mt-3 text-slate-800">{r.label}</div>
+                <div className="text-xs text-slate-500 leading-5 mt-1">{r.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <div className="text-sm text-slate-500">{text.role}</div>
+          <div className="text-2xl font-bold text-slate-900 mt-1">{LOGIN_ROLES.find((r) => r.id === selected)?.label}</div>
+          <button onClick={() => setRole(selected)} className="mt-5 w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 flex items-center justify-center gap-2"><KeyRound size={18} />{text.enter}</button>
+        </div>
+      </main>
+    </div>
+  );
+}
+
 export default function App() {
+  const [lang, setLang] = useState("ru");
+  const [role, setRole] = useState(null);
   const [active, setActive] = useState("dash");
   const [collapsed, setCollapsed] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef(null);
   const current = NAV.find((n) => n.id === active);
   const Screen = current.screen;
+  const shellText = SHELL_TEXT[lang];
+  const roleLabel = LOGIN_ROLES.find((r) => r.id === role)?.label;
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
@@ -1382,6 +1666,10 @@ export default function App() {
   const handleSetActive = (id) => {
     setActive(id);
   };
+
+  if (!role) {
+    return <LoginScreen lang={lang} setLang={setLang} setRole={setRole} />;
+  }
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
@@ -1451,13 +1739,18 @@ export default function App() {
             </button>
             <div className="min-w-0">
               <div className="text-xs text-slate-400 truncate hidden sm:block">Компания BRONUS · версия 2 — расширенная (NEW = предложено нами)</div>
+              <div className="text-xs text-indigo-600 truncate hidden sm:block">{shellText.version} · {roleLabel}</div>
               <h1 className="text-base sm:text-lg font-bold text-slate-800 leading-tight truncate">{current.label}</h1>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <div className="hidden lg:flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-1.5 text-sm text-slate-400 w-56"><Search size={15} /> <span className="truncate">Поиск по продукту, партии…</span></div>
+            <div className="hidden lg:flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-1.5 text-sm text-slate-400 w-56"><Search size={15} /> <span className="truncate">{shellText.search}</span></div>
+            <LanguageSwitch lang={lang} setLang={setLang} />
             <NotifBell />
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-sm font-semibold shadow-sm shrink-0">АК</div>
+            <button onClick={() => setRole(null)} className="hidden sm:flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+              <KeyRound size={15} /> {shellText.logout}
+            </button>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6"><Screen go={handleSetActive} /></main>
